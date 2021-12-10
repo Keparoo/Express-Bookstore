@@ -31,16 +31,16 @@ router.get('/:id', async function(req, res, next) {
 /** POST /   bookData => {book: newBook}  */
 
 router.post('/', async function(req, res, next) {
-	validateBook = jsonschema.validate(req.body, bookSchema);
-	// console.log(validateBook.errors);
-
-	if (!validateBook.valid) {
-		const errorList = validateBook.errors.map((e) => e.stack);
-		const error = new ExpressError(errorList, 400);
-		return next(error);
-	}
-
 	try {
+		validateBook = jsonschema.validate(req.body, bookSchema);
+		// console.log(validateBook.errors);
+
+		if (!validateBook.valid) {
+			return next({
+				status: 400,
+				error: validateBook.errors.map((e) => e.stack)
+			});
+		}
 		const book = await Book.create(req.body);
 		return res.status(201).json({ book });
 	} catch (err) {
@@ -51,16 +51,23 @@ router.post('/', async function(req, res, next) {
 /** PUT /[isbn]   bookData => {book: updatedBook}  */
 
 router.put('/:isbn', async function(req, res, next) {
-	validateBook = jsonschema.validate(req.body, bookSchema);
-	// console.log(validateBook.errors);
-
-	if (!validateBook.valid) {
-		const errorList = validateBook.errors.map((e) => e.stack);
-		const error = new ExpressError(errorList, 400);
-		return next(error);
-	}
-
 	try {
+		if ('isbn' in req.body) {
+			return next({
+				status: 400,
+				message: 'Not allowed to change ISBN'
+			});
+		}
+		validateBook = jsonschema.validate(req.body, bookSchema);
+		// console.log(validateBook.errors);
+
+		if (!validateBook.valid) {
+			return next({
+				status: 400,
+				error: validateBook.errors.map((e) => e.stack)
+			});
+		}
+
 		const book = await Book.update(req.params.isbn, req.body);
 		return res.json({ book });
 	} catch (err) {
