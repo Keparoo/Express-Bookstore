@@ -1,7 +1,8 @@
 const express = require('express');
 const Book = require('../models/book');
 const jsonschema = require('jsonschema');
-const bookSchema = require('../schemas/bookSchema.json');
+const bookSchemaCreate = require('../schemas/bookSchemaCreate.json');
+const bookSchemaUpdate = require('../schemas/bookSchemaUpdate.json');
 const ExpressError = require('../expressError');
 
 const router = new express.Router();
@@ -32,7 +33,7 @@ router.get('/:id', async function(req, res, next) {
 
 router.post('/', async function(req, res, next) {
 	try {
-		validateBook = jsonschema.validate(req.body, bookSchema);
+		validateBook = jsonschema.validate(req.body, bookSchemaCreate);
 		// console.log(validateBook.errors);
 
 		if (!validateBook.valid) {
@@ -58,7 +59,7 @@ router.put('/:isbn', async function(req, res, next) {
 				message: 'Not allowed to change ISBN'
 			});
 		}
-		validateBook = jsonschema.validate(req.body, bookSchema);
+		validateBook = jsonschema.validate(req.body, bookSchemaUpdate);
 		// console.log(validateBook.errors);
 
 		if (!validateBook.valid) {
